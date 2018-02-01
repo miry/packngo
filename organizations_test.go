@@ -50,3 +50,37 @@ func TestAccOrg(t *testing.T) {
 	}
 
 }
+func TestOrgListPaymentMethods(t *testing.T) {
+	skipUnlessAcceptanceTestsAllowed(t)
+
+	// setup
+	c := setup(t)
+	defer organizationTeardown(c)
+
+	rs := testProjectPrefix + randString8()
+	ocr := OrganizationCreateRequest{
+		Name:        rs,
+		Description: "Managed by Terraform.",
+		Website:     "http://example.com",
+		Twitter:     "foo",
+	}
+	org, _, err := c.Organizations.Create(&ocr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	pms, _, err := c.Organizations.ListPaymentMethods(org.ID)
+	if err != nil {
+		t.Fatal("error: ", err)
+	}
+
+	t.Fatalf("Methods: %v", pms)
+
+	// teardown
+	_, err = c.Organizations.Delete(org.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}
